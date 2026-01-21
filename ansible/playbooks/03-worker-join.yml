@@ -1,0 +1,27 @@
+- name: Joindre le worker au cluster
+  hosts: workers
+  become: true
+  tasks:
+    - name: Verification si le worker est deja join au cluster
+      stat:
+        path: /etc/kubernetes/kubelet.conf
+      register: kubelet_conf
+
+    - name: Ajout de la commande join au worker
+      copy:
+        src: /tp-cloudmemo/ansible/join-command.sh
+        dest: /tmp/join-command.sh
+        mode: "0755"
+      when: not kubelet_conf.stat.exists
+
+    - name: Verification que la commande join est bien sur le worker
+      stat:
+        path: /tmp/join-command.sh
+      register: join_script
+      when: not kubelet_conf.stat.exists
+
+    - name: Execution de la commande join
+      command: /bin/bash /tmp/join-command.sh
+      when:
+        - not kubelet_conf.stat.exists
+        - join_script.stat.exists
