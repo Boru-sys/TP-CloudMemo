@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-redis-team-blue
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/k8s/team-blue/redis
+  claimRef:
+    namespace: team-blue
+    name: redis-data-redis-0 
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-redis-team-green
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: manual
+  hostPath:
+    path: /mnt/k8s/team-green/redis
+  claimRef:
+    namespace: team-green
+    name: redis-data-redis-0

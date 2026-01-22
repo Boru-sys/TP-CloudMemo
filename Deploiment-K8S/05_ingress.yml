@@ -1,0 +1,43 @@
+# =========================
+# TEAM BLUE
+# =========================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudmemo
+  namespace: team-blue
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: blue.elio.tp.kaas-mvp-ts.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudmemo
+                port:
+                  number: 5000
+---
+# =========================
+# TEAM GREEN
+# =========================
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: cloudmemo
+  namespace: team-green
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: green.elio.tp.kaas-mvp-ts.fr
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: cloudmemo
+                port:
+                  number: 5000

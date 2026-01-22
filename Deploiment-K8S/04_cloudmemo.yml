@@ -1,0 +1,109 @@
+# =========================
+# TEAM BLUE - CloudMemo App
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudmemo
+  namespace: team-blue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudmemo
+  template:
+    metadata:
+      labels:
+        app: cloudmemo
+    spec:
+      containers:
+        - name: cloudmemo
+          image: dindonheureux/cloudmemo:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            # Le DNS "redis" résout vers redis.team-blue.svc.cluster.local dans ce namespace
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+          readinessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudmemo
+  namespace: team-blue
+spec:
+  type: ClusterIP
+  selector:
+    app: cloudmemo
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
+---
+# =========================
+# TEAM GREEN - CloudMemo App
+# =========================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudmemo
+  namespace: team-green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cloudmemo
+  template:
+    metadata:
+      labels:
+        app: cloudmemo
+    spec:
+      containers:
+        - name: cloudmemo
+          image: dindonheureux/cloudmemo:0.1.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            # Le DNS "redis" résout vers redis.team-green.svc.cluster.local dans ce namespace
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+          readinessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 5000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cloudmemo
+  namespace: team-green
+spec:
+  type: ClusterIP
+  selector:
+    app: cloudmemo
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000

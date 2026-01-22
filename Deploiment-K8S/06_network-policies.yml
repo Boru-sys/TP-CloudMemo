@@ -1,0 +1,214 @@
+########################################
+# TEAM BLUE
+########################################
+
+# 1) Default deny ALL traffic (Ingress + Egress) in team-blue
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: team-blue
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+# 2) Allow DNS egress to CoreDNS (kube-system/kube-dns) so pods can resolve names
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: team-blue
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+# 3) Allow ingress-nginx controller to reach CloudMemo on TCP/5000
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-nginx-to-cloudmemo
+  namespace: team-blue
+spec:
+  podSelector:
+    matchLabels:
+      app: cloudmemo
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+          app.kubernetes.io/component: controller
+    ports:
+    - protocol: TCP
+      port: 5000
+---
+# 4) Allow CloudMemo -> Redis (same namespace) on TCP/6379 (Redis INGRESS side)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cloudmemo-to-redis
+  namespace: team-blue
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cloudmemo
+    ports:
+    - protocol: TCP
+      port: 6379
+---
+# 5) Allow CloudMemo -> Redis (same namespace) on TCP/6379 (CloudMemo EGRESS side)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cloudmemo-egress-to-redis
+  namespace: team-blue
+spec:
+  podSelector:
+    matchLabels:
+      app: cloudmemo
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+
+########################################
+# TEAM GREEN
+########################################
+---
+# 1) Default deny ALL traffic (Ingress + Egress) in team-green
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: team-green
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+---
+# 2) Allow DNS egress to CoreDNS (kube-system/kube-dns) so pods can resolve names
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns-egress
+  namespace: team-green
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+      podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
+---
+# 3) Allow ingress-nginx controller to reach CloudMemo on TCP/5000
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-ingress-nginx-to-cloudmemo
+  namespace: team-green
+spec:
+  podSelector:
+    matchLabels:
+      app: cloudmemo
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: ingress-nginx
+          app.kubernetes.io/component: controller
+    ports:
+    - protocol: TCP
+      port: 5000
+---
+# 4) Allow CloudMemo -> Redis (same namespace) on TCP/6379 (Redis INGRESS side)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cloudmemo-to-redis
+  namespace: team-green
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: cloudmemo
+    ports:
+    - protocol: TCP
+      port: 6379
+---
+# 5) Allow CloudMemo -> Redis (same namespace) on TCP/6379 (CloudMemo EGRESS side)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-cloudmemo-egress-to-redis
+  namespace: team-green
+spec:
+  podSelector:
+    matchLabels:
+      app: cloudmemo
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app: redis
+    ports:
+    - protocol: TCP
+      port: 6379
+
