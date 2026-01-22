@@ -18,6 +18,9 @@ Déploiement d’une application **Flask stateless** + **Redis stateful** sur un
 
 ## Arborescence du repo
 
+## Arborescence du repo
+
+<pre>
 TP-CloudMemo/
 ├─ ansible/
 │  ├─ inventories/
@@ -32,8 +35,13 @@ TP-CloudMemo/
 │  ├─ team-blue/
 │  └─ team-green/
 ├─ app/ (optionnel)
-├─ resources/ (docker-compose, app.py, requirements, etc.)
+├─ resources/
+│  ├─ docker-compose.yml
+│  ├─ app.py
+│  └─ requirements.txt
 └─ docs/
+</pre>
+
 
 ## 1) Déploiement du cluster Kubernetes (Ansible)
 
