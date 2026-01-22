@@ -103,29 +103,57 @@ kubectl get pods -n team-green
 kubectl get pvc -A
 kubectl get ingress -A
 
-5) Tests de validation
-A) Test Redis (DNS + port)
-kubectl -n team-blue run redis-test --rm -it --image=busybox -- sh -c "nslookup redis && nc -zv redis 6379"
-kubectl -n team-green run redis-test --rm -it --image=busybox -- sh -c "nslookup redis && nc -zv redis 6379"
+## Étape 4 – Network Policies (Sécurité Réseau)
 
-B) Test application via port-forward
+### Objectif
+Isoler deux environnements Kubernetes (**team-blue** et **team-green**) afin d’empêcher toute communication réseau non autorisée entre leurs applications et bases de données.
 
-Blue :
+---
 
-kubectl -n team-blue port-forward svc/cloudmemo 8081:80
-curl http://127.0.0.1:8081
+### Principe
+Dans chaque namespace :
+- Tout le trafic est bloqué par défaut (Ingress + Egress).
+- Seules les communications suivantes sont autorisées :
+  - Ingress Controller → Application CloudMemo (TCP 5000)
+  - Application CloudMemo → Redis du même namespace (TCP 6379)
+  - Accès DNS vers CoreDNS
 
+---
 
-Green :
+### Vérification des policies
+```bash
+kubectl get netpol -n team-blue
+kubectl get netpol -n team-green
+```
 
-kubectl -n team-green port-forward svc/cloudmemo 8082:80
-curl http://127.0.0.1:8082
+---
 
-C) Test isolation réseau (hack)
+### Test de sécurité (scénario d’attaque)
+```bash
+kubectl -n team-blue set env deployment/cloudmemo REDIS_HOST=redis.team-green.svc.cluster.local
+kubectl -n team-blue rollout restart deployment/cloudmemo
+```
 
-Objectif : Blue ne doit pas accéder au Redis de Green.
+```bash
+kubectl -n team-blue exec deploy/cloudmemo -- python3 - <<'PY'
+import socket
+s=socket.socket(); s.settimeout(2)
+try:
+    s.connect(("redis.team-green.svc.cluster.local",6379))
+    print("Connexion autorisée (non attendu)")
+except Exception as e:
+    print("Connexion bloquée (attendu):", e)
+PY
+```
 
-kubectl -n team-blue run nettest --rm -it --image=busybox -- sh -c "nc -zv redis.team-green.svc.cluster.local 6379"
+---
+
+### Résultat attendu
+- DNS fonctionnel
+- Connexion Redis inter-namespace bloquée
+- Données isolées entre `team-blue` et `team-green`
+
+✅ Sécurité réseau validée.
 
 
 ✅ attendu : échec (timeout/refused), si les NetworkPolicies sont correctes.
