@@ -18,8 +18,6 @@ Déploiement d’une application **Flask stateless** + **Redis stateful** sur un
 
 ## Arborescence du repo
 
-## Arborescence du repo
-
 <pre>
 TP-CloudMemo/
 ├─ ansible/
