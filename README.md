@@ -62,12 +62,12 @@ Vérification sur le control-plane :
 kubectl get nodes -o wide
 kubectl get pods -A
 
-2) Ingress NGINX (sur control-plane)
+#2) Ingress NGINX (sur control-plane)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
 kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=180s
 kubectl get pods -n ingress-nginx
 
-3) Stockage (PVC Redis)
+#3) Stockage (PVC Redis)
 
 Sur kubeadm “nu”, un StorageClass peut manquer.
 Installation d’un provisioner local (TP/lab) :
@@ -76,7 +76,7 @@ kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisione
 kubectl patch storageclass local-path -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 kubectl get storageclass
 
-4) Déploiement applicatif (Kubernetes manifests)
+#4) Déploiement applicatif (Kubernetes manifests)
 
 Les manifests sont dans k8s/ :
 
