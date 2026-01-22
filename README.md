@@ -11,7 +11,7 @@ Déploiement d’une application **Flask stateless** + **Redis stateful** sur un
 ## Pré-requis
 
 - 3 VMs : `ansible`, `controle-plane`, `worker`
-- Ubuntu 24.04 (ou compatible)
+- Ubuntu 24.04 
 - Accès SSH depuis `ansible` vers `controle-plane` et `worker`
 - Cluster Kubernetes installé via kubeadm + CNI (Calico)
 - `kubectl` fonctionnel sur le control-plane
@@ -27,11 +27,6 @@ TP-CloudMemo/
 │     ├─ 01-installation_K8S_CP_W.yml
 │     ├─ 02-controlplane-init.yml
 │     ├─ 03-worker-join.yml
-│     └─ 04-deploy-cloudmemo.yml (optionnel)
-├─ k8s/
-│  ├─ base/
-│  ├─ team-blue/
-│  └─ team-green/
 ├─ app/ (optionnel)
 ├─ resources/
 │  ├─ docker-compose.yml
@@ -57,46 +52,24 @@ ansible-playbook -i inventories/hosts.yml playbooks/02-controlplane-init.yml
 # Join du worker
 ansible-playbook -i inventories/hosts.yml playbooks/03-worker-join.yml
 
-Vérification sur le control-plane :
+#Vérification sur le control-plane :
 
 kubectl get nodes -o wide
 kubectl get pods -A
 
 #2) Ingress NGINX (sur control-plane)
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.11.1/deploy/static/provider/cloud/deploy.yaml
-kubectl -n ingress-nginx rollout status deploy/ingress-nginx-controller --timeout=180s
 kubectl get pods -n ingress-nginx
 
 #3) Stockage (PVC Redis)
 
-Sur kubeadm “nu”, un StorageClass peut manquer.
-Installation d’un provisioner local (TP/lab) :
+Utilisation d'une storage class manuelle pour stocker les données de REDIS de manière persistantes sur le worker
 
-kubectl apply -f https://raw.githubusercontent.com/rancher/local-path-provisioner/master/deploy/local-path-storage.yaml
-kubectl patch storageclass local-path -p '{"metadata":{"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-kubectl get storageclass
+#4) Déploiement applicatif (Kubernetes)
 
-#4) Déploiement applicatif (Kubernetes manifests)
+Création des différents fichiers YAML sur le control plane afin de déployer les applications requises :
 
-Les manifests sont dans k8s/ :
-
-k8s/base/ : namespaces
-
-k8s/team-blue/ : redis + app + netpol + ingress
-
-k8s/team-green/ : redis + app + netpol + ingress
-
-⚠️ Les hosts Ingress doivent être en minuscules (RFC1123).
-Exemple : blue.elio.tp.kaas-mvp-ts.fr / green.elio.tp.kaas-mvp-ts.fr
-
-Déploiement (à la main sur control-plane) :
-
-kubectl apply -f k8s/base/
-kubectl apply -f k8s/team-blue/
-kubectl apply -f k8s/team-green/
-
-
-Vérification :
+01_namespace.yml  02_pv.yml  03_redis.yml  04_cloudmemo.yml  05_ingress.yml  06_network-policies.yml
 
 kubectl get pods -n team-blue
 kubectl get pods -n team-green
