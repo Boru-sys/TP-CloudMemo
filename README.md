@@ -102,6 +102,7 @@ kubectl get pods -n team-blue
 kubectl get pods -n team-green
 kubectl get pvc -A
 kubectl get ingress -A
+```
 
 ## Étape 4 – Network Policies (Sécurité Réseau)
 
