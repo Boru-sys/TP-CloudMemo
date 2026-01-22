@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Ansible
+*.retry
+
+# Kubernetes / kubeconfig
+kubeconfig
+
+# Logs
+*.log
+
+# Secrets / tokens
+join-command.sh
