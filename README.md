@@ -20,21 +20,20 @@ Déploiement d’une application **Flask stateless** + **Redis stateful** sur un
 
 TP-CloudMemo/
 ├─ ansible/
-│ ├─ inventories/
-│ │ └─ hosts.yml
-│ └─ playbooks/
-│ ├─ 01-installation_K8S_CP_W.yml
-│ ├─ 02-controlplane-init.yml
-│ ├─ 03-worker-join.yml
-│ └─ 04-deploy-cloudmemo.yml (optionnel si utilisé)
+│  ├─ inventories/
+│  │  └─ hosts.yml
+│  └─ playbooks/
+│     ├─ 01-installation_K8S_CP_W.yml
+│     ├─ 02-controlplane-init.yml
+│     ├─ 03-worker-join.yml
+│     └─ 04-deploy-cloudmemo.yml (optionnel)
 ├─ k8s/
-│ ├─ base/
-│ ├─ team-blue/
-│ └─ team-green/
+│  ├─ base/
+│  ├─ team-blue/
+│  └─ team-green/
 ├─ app/ (optionnel)
 ├─ resources/ (docker-compose, app.py, requirements, etc.)
 └─ docs/
-
 
 ## 1) Déploiement du cluster Kubernetes (Ansible)
 
